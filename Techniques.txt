@@ -1,3 +1,21 @@
   Arrays
 1) Sort
 2) Two Pointer
+
+
+  LinkedList
+1) fast and slow -> while (fast && fast.next)
+2) Adding a dummy in fornt to avoid corner cases
+3) Merge two sorted Linked LinkedLists in Bactracking technique
+4) Reverse Values b/w left and right
+     apply for loop -> left - 1 = temp;
+     reverse from temp -> right - left + 1;
+     adjust
+5) Reverse in K groups -> O(n2) 
+6) Remove Duplicates
+    - add a dummy
+    while(temp.next && temp.next.next)
+7) Partition List for a value X 
+   where values less go to left and greater go to right
+   use two dummy nodes and append values to them as you traverse
+   based on lesser or greater then join them
