@@ -1,7 +1,7 @@
   Arrays
 1) Sort
 2) Two Pointer
-
+3) Reverse array to remove all min values to the right of any element
 
   LinkedList
 1) fast and slow -> while (fast && fast.next)
@@ -19,3 +19,5 @@
    where values less go to left and greater go to right
    use two dummy nodes and append values to them as you traverse
    based on lesser or greater then join them
+
+8) Reverse to remove all min values to the right of any element
