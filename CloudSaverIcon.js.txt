@@ -1,0 +1,132 @@
+CloudSaverIcon.js
+
+
+import React,{useState,useEffect} from 'react';
+import Uploading from '../../assets/Images/CloudUploading.gif';
+import Uploaded from '../../assets/Images/CloudTick.gif';
+import Offline from '../../assets/Images/CloudCross.gif';
+import {ReactComponent as CloudTick} from '../../assets/Images/CloudTick.svg';
+import { useSnackbar } from '../CustomSnackbar';
+import {ReactComponent as CloudCross} from '../../assets/Images/CloudCross.svg'; 
+import Status from '../../models/enums/SavingStatus';
+import {useLocalizerContext} from '@disprz/components';
+
+const CloudSaverIcon = ({savingTimestamp}) => {
+  const { getLanguageText } = useLocalizerContext();
+  const [isOnline,setIsOnline] = useState(navigator.onLine);
+  const [showOfflineIcon, setShowOfflineIcon] = useState(false);
+  const [iconState, setIconState] = useState(Status.IDLE);
+  const snackbar = useSnackbar(); 
+  const SAVING_ANIMA_DELAY = 1500;
+  const SAVED_ANIMA_DELAY = 1000;
+
+  useEffect(()=>{
+
+    const handleStatusChange = () => {
+      setIsOnline(navigator.onLine);
+    };
+
+    window.addEventListener('online',handleStatusChange);
+    window.addEventListener('offline',handleStatusChange);
+
+    return ()=>{
+      window.removeEventListener('online',handleStatusChange);
+      window.removeEventListener('offline',handleStatusChange);
+    };
+  },[])
+
+
+  useEffect(() => {
+    if(!savingTimestamp) return;
+    
+    let saveAnimationDelay, savingAnimationDelay;
+    setIconState(Status.SAVING_INPROGRESS);
+    savingAnimationDelay = setTimeout(() => 
+      {
+              setIconState(Status.SAVED);
+              saveAnimationDelay = setTimeout(() => 
+                  {
+                      setIconState(Status.IDLE); 
+                    }, 
+                    SAVED_ANIMA_DELAY
+              );
+        }, 
+        SAVING_ANIMA_DELAY
+      );
+     
+    return () => {clearTimeout(saveAnimationDelay); clearTimeout(savingAnimationDelay);};
+    }, [savingTimestamp]);
+
+    useEffect(()=>{
+      const timeoutId = setTimeout(() => {
+        setShowOfflineIcon(true);
+      }, 2000);
+  
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    },[])
+  
+    useEffect(()=>{
+      if(!isOnline){
+        snackbar.showToast({
+          message : getLanguageText('common.unableToSaveToast'),
+          duration: -1
+        })
+      }
+      else{
+        snackbar.hideToast();
+      }
+    },[isOnline])
+
+  const UploadDelay = () => {
+
+      const renderIcon = (src, label) => (
+        <div className='upload-icon'>
+          <div>
+            <img src={src} alt={label} />
+          </div>
+          <div>
+            <p>{label}</p>
+          </div>
+        </div>
+      );
+
+      
+      switch(iconState)
+      {
+        case Status.SAVING_INPROGRESS: 
+          return renderIcon(Uploading, getLanguageText('common.saveInProgressLabel'));
+        case Status.SAVED: 
+          return renderIcon(Uploaded, getLanguageText('common.savedLabel'));
+        default:
+        return (
+          <div className='upload-icon'>
+            <div style={{ height: '40px' }}>
+              <CloudTick />
+            </div>
+            <div>
+              <p>{getLanguageText('common.savedLabel')}</p>
+            </div>
+          </div>
+        );
+      }
+  };
+  
+  const OfflineIcon = ()=>{
+    return (
+      <div className='offline-icon'>
+        {showOfflineIcon ? <CloudCross /> : <img src={Offline} alt="Offline" />}
+        <div><p>{getLanguageText('common.notSavedLabel')}</p></div>
+      </div>
+    );    
+  }
+
+  return (
+   (savingTimestamp && 
+     (isOnline ? (<UploadDelay/>) : (<OfflineIcon />))
+    )
+  )
+}
+
+export default CloudSaverIcon;
