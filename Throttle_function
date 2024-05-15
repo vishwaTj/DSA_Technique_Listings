@@ -1,0 +1,20 @@
+import {useRef,useMemo,useEffect} from 'react';
+import _ from "lodash";
+
+const useThrottleAutoSave = (saveFunction) => {
+  const functionref = useRef(saveFunction);
+  
+  useEffect(()=>{
+    functionref.current = saveFunction;
+  },[saveFunction]);
+
+  // Memoising the function to keep it static for the timer to run
+  const throttleBack=useMemo(()=>{
+    const func = ()=>{functionref.current?.()};
+    return _.throttle(func,1500,{'leading':false,'trailing': true})
+  },[]);
+  
+  return throttleBack;
+}
+
+export default useThrottleAutoSave;
